@@ -1,1 +1,0 @@
-import{a1 as l,c as n,x as p,o as c,r as u,a7 as i,a6 as s}from"./CgEXd-7r.js";const m={base:"my-5 leading-7 text-pretty"},_={__name:"ProseP",props:{class:{type:null,required:!1}},setup(e){const a=e,t=l(),o=n(()=>s({extend:s(m),...t.ui?.prose?.p||{}}));return(r,d)=>(c(),p("p",{class:i(o.value({class:a.class}))},[u(r.$slots,"default")],2))}};export{_ as default};

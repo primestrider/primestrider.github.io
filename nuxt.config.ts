@@ -31,13 +31,8 @@ export default defineNuxtConfig({
   image: {
     format: ["webp", "avif"], // 🔥 format gambar modern
   },
-
-  eslint: {
-    config: {
-      stylistic: {
-        commaDangle: "never",
-        braceStyle: "1tbs",
-      },
-    },
+  routeRules: {
+    // pastikan route utama di-prerender
+    "/**": { prerender: true },
   },
 });

@@ -4,11 +4,6 @@ seo:
 title: "Ricky Ng"
 description: "a software developer."
 hero:
-  links:
-    - label: "Use this template"
-      to: https://github.com/nuxt-ui-templates/portfolio
-      color: "neutral"
-
 about:
   title: "About Me"
   description: |

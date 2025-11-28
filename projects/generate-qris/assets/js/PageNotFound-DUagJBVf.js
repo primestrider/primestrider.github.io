@@ -1,0 +1,1 @@
+import{k as r,y as a}from"./index-CZ6bnK3W.js";const s=(t,e)=>{const o=t.__vccOpts||t;for(const[n,c]of e)o[n]=c;return o},_={};function f(t,e){return a(),r("div",null,"Page Not Found")}const u=s(_,[["render",f]]);export{u as default};

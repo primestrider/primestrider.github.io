@@ -18,9 +18,7 @@ useHead({
 });
 
 useSeoMeta({
-  titleTemplate: "Ricky Ng - Profile",
-  ogImage: "https://ui.nuxt.com/assets/templates/nuxt/portfolio-light.png",
-  twitterImage: "https://ui.nuxt.com/assets/templates/nuxt/portfolio-light.png",
+  titleTemplate: "primestrider's profile web",
   twitterCard: "summary_large_image",
 });
 </script>

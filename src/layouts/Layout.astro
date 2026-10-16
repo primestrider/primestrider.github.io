@@ -25,6 +25,8 @@ const imageUrl = site ? new URL(image, site).href : image;
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>{title}</title>
 		<meta name="description" content={description} />
+		<!-- Google Search Console ownership; keep it, Google re-checks periodically -->
+		<meta name="google-site-verification" content="R74LGqAfR2h_lMaQU2JE1gm6bjGod6Bi0GfS0KbmTCM" />
 		{noindex && <meta name="robots" content="noindex" />}
 		<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
 		<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />

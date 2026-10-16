@@ -1,0 +1,163 @@
+---
+import { profile } from '../data/portfolio';
+
+const words = profile.intro.split(' ');
+---
+
+<section class="hero" aria-labelledby="hero-name">
+	<div class="topline" data-hero="line">
+		<!-- One heading for name and role, so the page's main heading says who and what -->
+		<h1 class="intro-h" id="hero-name">
+			<span class="name">{profile.name}</span>
+			<span>{profile.role} based in {profile.city}</span>
+		</h1>
+		<p class="clock" hidden>Local time <time data-clock></time></p>
+	</div>
+
+	<!-- The intro is the headline; GSAP raises each word out of its own mask on load -->
+	<p class="headline">
+		<span class="sr-only">{profile.intro}</span>
+		<span aria-hidden="true">
+			{
+				words.map((w) => (
+					<span class="w">
+						<span>{w}</span>
+					</span>
+				))
+			}
+		</span>
+	</p>
+
+	<div class="info" data-hero="info">
+		<p class="status">{profile.status}</p>
+		<div class="actions">
+			<a class="primary" href="#projects">See projects</a>
+			<a href={profile.github}>GitHub</a>
+			<a href={profile.linkedin}>LinkedIn</a>
+		</div>
+	</div>
+</section>
+
+<style>
+	.hero {
+		padding-block: clamp(8rem, 14vw, 9rem) clamp(3rem, 7vw, 5rem);
+	}
+
+	.topline {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.25rem 2rem;
+		padding-bottom: 1rem;
+		border-bottom: 2px solid var(--ink);
+		color: var(--slate);
+	}
+
+	.intro-h {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.25rem 2rem;
+		font-size: var(--step-0);
+		font-weight: 400;
+	}
+
+	.name {
+		font-size: var(--step-1);
+		font-weight: 800;
+		letter-spacing: -0.02em;
+		color: var(--ink);
+	}
+
+	.clock {
+		margin-left: auto;
+		font-variant-numeric: tabular-nums;
+	}
+
+	.headline {
+		max-width: 28ch;
+		margin-block: clamp(2rem, 5vw, 3rem);
+		font-size: clamp(1.625rem, 1rem + 2.4vw, 3.125rem);
+		font-weight: 800;
+		line-height: 1.12;
+		letter-spacing: -0.045em;
+	}
+
+	.w {
+		display: inline-block;
+		overflow: clip;
+		padding-bottom: 0.1em;
+		margin-bottom: -0.1em;
+		vertical-align: top;
+	}
+
+	/* Trailing space stays outside the mask so words wrap normally */
+	.w::after {
+		content: ' ';
+		white-space: pre;
+	}
+
+	.w > span {
+		display: inline-block;
+		transform-origin: left bottom;
+	}
+
+	.info {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1.25rem 2rem;
+	}
+
+	.status {
+		color: var(--slate);
+	}
+
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem 1.25rem;
+		align-items: center;
+		font-weight: 600;
+	}
+
+	.actions .primary {
+		padding: 0.7rem 1.1rem;
+		background: var(--ink);
+		color: var(--paper);
+		text-decoration: none;
+		border-radius: 999px;
+		transition: background-color 0.2s ease;
+	}
+
+	.actions .primary:hover {
+		background: var(--slate);
+		color: var(--paper);
+	}
+
+	.sr-only {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+</style>
+
+<script>
+	// Live Jakarta time; stays hidden if the browser can't format it
+	const clock = document.querySelector<HTMLTimeElement>('[data-clock]');
+	if (clock) {
+		const fmt = new Intl.DateTimeFormat('en-GB', {
+			timeZone: 'Asia/Jakarta',
+			hour: '2-digit',
+			minute: '2-digit',
+		});
+		const tick = () => (clock.textContent = `${fmt.format(new Date())} WIB`);
+		tick();
+		clock.parentElement!.hidden = false;
+		setInterval(tick, 30_000);
+	}
+</script>

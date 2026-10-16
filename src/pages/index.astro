@@ -1,11 +1,387 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
+import Projects from '../components/Projects.astro';
+import { profile, about, experience, skillGroups } from '../data/portfolio';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const year = new Date().getFullYear();
+
+const title = `${profile.name} | ${profile.role} in Jakarta`;
+const description = `${profile.name} is a ${profile.role.toLowerCase()} in Jakarta building web and mobile apps with Vue, Nuxt, React, and React Native. Open to freelance work.`;
+
+// Structured data so search engines can read who this page is about
+const site = Astro.site?.href;
+const schema = {
+	'@context': 'https://schema.org',
+	'@graph': [
+		{
+			'@type': 'Person',
+			'@id': site ? `${site}#person` : '#person',
+			name: profile.name,
+			jobTitle: profile.role,
+			description,
+			...(site && { url: site, image: new URL('/og.jpg', site).href }),
+			address: { '@type': 'PostalAddress', addressLocality: 'Jakarta', addressCountry: 'ID' },
+			worksFor: { '@type': 'Organization', name: 'PT Reka Multi Aptika' },
+			sameAs: [profile.github, profile.linkedin],
+			knowsAbout: skillGroups.flatMap((g) => g.skills),
+		},
+		{
+			'@type': 'WebSite',
+			name: profile.name,
+			...(site && { url: site }),
+			inLanguage: 'en',
+			about: { '@id': site ? `${site}#person` : '#person' },
+		},
+	],
+};
 ---
 
-<Layout>
-	<Welcome />
+<Layout title={title} description={description}>
+	<script slot="head" type="application/ld+json" set:html={JSON.stringify(schema)} />
+	<!-- Fixed frosted bar -->
+	<header class="top">
+		<div class="wrap top-inner">
+			<a class="brand" href="#"><img src="/logo.webp" width="140" height="96" alt={profile.name} /></a>
+			<nav aria-label="Main navigation">
+				<a href="#about">About</a>
+				<a href="#skills">Skills</a>
+				<a href="#projects">Projects</a>
+				<a href="#contact">Contact</a>
+			</nav>
+		</div>
+	</header>
+
+	<main>
+		<div class="wrap">
+			<Hero />
+		</div>
+
+		<!-- About: one statement, then a full-width experience index -->
+		<section class="wrap section" id="about" aria-labelledby="about-h">
+			<h2 id="about-h" class="heading" data-reveal="heading">About</h2>
+			<p class="statement" data-reveal>{about}</p>
+
+			<h3 class="label index-h" data-reveal>Experience <sup>({experience.length})</sup></h3>
+			<ol class="index" data-reveal="stagger">
+				{
+					experience.map((e) => (
+						<li>
+							<span class="what">{e.role}</span>
+							<span class="where">{e.place}</span>
+							<span class="when">{e.years}</span>
+						</li>
+					))
+				}
+			</ol>
+		</section>
+
+		<!-- Skills: inverted band with grouped badges -->
+		<section class="band" id="skills" aria-labelledby="skills-h">
+			<div class="wrap section">
+				<h2 id="skills-h" class="heading" data-reveal="heading">Skills</h2>
+				<div class="skills" data-reveal="stagger">
+					{
+						skillGroups.map((group, i) => (
+							<div class="group">
+								<h3>
+									{group.title}
+								</h3>
+								<ul class="badges">
+									{group.skills.map((s) => (
+										<li>{s}</li>
+									))}
+								</ul>
+							</div>
+						))
+					}
+				</div>
+			</div>
+		</section>
+
+		<div class="wrap">
+			<Projects />
+		</div>
+	</main>
+
+	<!-- Contact: inverted footer where the LinkedIn link is the headline -->
+	<footer class="band contact" id="contact" aria-labelledby="contact-h">
+		<div class="wrap section">
+			<h2 id="contact-h" class="label" data-reveal>Contact</h2>
+			<p class="ask" data-reveal>Have a project or a role that fits?</p>
+			<a class="cta" href={profile.linkedin} data-reveal>Message me on LinkedIn</a>
+		</div>
+		<div class="wrap base">
+			<p>&copy; {year} {profile.name}</p>
+			<p class="base-links">
+				<a href={profile.github}>GitHub</a>
+				<a href={profile.linkedin}>LinkedIn</a>
+				<a href="#">Back to top</a>
+			</p>
+		</div>
+	</footer>
 </Layout>
+
+<style>
+	.wrap {
+		width: min(100% - 2 * var(--gutter), var(--max));
+		margin-inline: auto;
+	}
+
+	/* Frosted bar: content scrolling underneath shows through, blurred */
+	.top {
+		position: fixed;
+		inset: 0 0 auto;
+		z-index: 10;
+		background: color-mix(in srgb, var(--paper) 70%, transparent);
+		-webkit-backdrop-filter: blur(16px) saturate(1.4);
+		backdrop-filter: blur(16px) saturate(1.4);
+		border-bottom: 1px solid var(--line);
+	}
+
+	.top-inner {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: 0.5rem 1.5rem;
+		padding-block: 1rem;
+	}
+
+	.top a {
+		text-decoration: none;
+	}
+
+	/* The logo file is a white mark on transparency; invert it to black on light pages */
+	.brand {
+		display: block;
+		align-self: center;
+	}
+
+	.brand img {
+		display: block;
+		width: auto;
+		height: 1.75rem;
+		filter: invert(1);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.brand img {
+			filter: none;
+		}
+	}
+
+	nav {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 1.25rem;
+	}
+
+	nav a {
+		position: relative;
+	}
+
+	nav a::after {
+		content: '';
+		position: absolute;
+		inset-inline: 0;
+		bottom: -4px;
+		height: 1.5px;
+		background: currentColor;
+		transform: scaleX(0);
+		transform-origin: right;
+		transition: transform 0.25s ease;
+	}
+
+	nav a:hover::after {
+		transform: scaleX(1);
+		transform-origin: left;
+	}
+
+	.section {
+		padding-block: clamp(4rem, 9vw, 7.5rem);
+	}
+
+	/* Small sub-labels inside a section */
+	.label {
+		font-size: var(--step-0);
+		font-weight: 600;
+		color: var(--slate);
+		margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
+	}
+
+	.label sup {
+		font-size: 0.7em;
+		vertical-align: super;
+	}
+
+	/* About */
+	.statement {
+		max-width: 30ch;
+		font-size: clamp(1.25rem, 0.95rem + 1.3vw, 2rem);
+		font-weight: 600;
+		line-height: 1.2;
+		letter-spacing: -0.035em;
+	}
+
+	.index-h {
+		margin-top: clamp(3.5rem, 7vw, 5.5rem);
+		margin-bottom: 0;
+		padding-bottom: 0.75rem;
+		border-bottom: 2px solid var(--ink);
+	}
+
+	.index {
+		list-style: none;
+		padding: 0;
+	}
+
+	.index li {
+		display: grid;
+		gap: 0.25rem 2rem;
+		padding: 1.5rem 0;
+		border-bottom: 1px solid var(--line);
+		transition:
+			padding 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
+			background-color 0.3s ease,
+			color 0.3s ease;
+	}
+
+	.index li:hover {
+		--slate: #8f8f8f;
+		padding-inline: 1rem;
+		background: var(--ink);
+		color: var(--paper);
+	}
+
+	@media (min-width: 48rem) {
+		.index li {
+			grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 9rem;
+			align-items: baseline;
+		}
+
+		.index .when {
+			text-align: right;
+		}
+	}
+
+	.what {
+		font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+		font-weight: 800;
+		letter-spacing: -0.035em;
+		line-height: 1.15;
+	}
+
+	.where,
+	.when {
+		color: var(--slate);
+	}
+
+	.when {
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+
+	/* Inverted bands (skills and footer) */
+	.band {
+		--ink: #ffffff;
+		--slate: #a3a3a3;
+		--line: rgb(255 255 255 / 0.22);
+		--accent: #ffffff;
+		--paper: #000000;
+		background: #000000;
+		color: var(--ink);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.band {
+			border-top: 1px solid var(--line);
+		}
+	}
+
+	.skills {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+		gap: 2.5rem;
+	}
+
+	.group h3 {
+		font-size: var(--step-1);
+		font-weight: 700;
+		letter-spacing: -0.02em;
+		padding-bottom: 0.6rem;
+		border-bottom: 2px solid var(--ink);
+	}
+
+	.badges {
+		list-style: none;
+		padding: 0;
+		margin-top: 1rem;
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.badges li {
+		padding: 0.35rem 0.8rem;
+		border: 1px solid var(--line);
+		border-radius: 999px;
+		font-size: var(--step--1);
+		font-weight: 550;
+		line-height: 1.3;
+		transition:
+			background-color 0.2s ease,
+			color 0.2s ease,
+			border-color 0.2s ease;
+	}
+
+	.badges li:hover {
+		background: var(--ink);
+		color: var(--paper);
+		border-color: var(--ink);
+	}
+
+	/* Contact */
+	.ask {
+		font-size: var(--step-1);
+		color: var(--slate);
+		margin-bottom: 1rem;
+	}
+
+	.cta {
+		display: inline-block;
+		font-size: clamp(1.625rem, 1rem + 2.4vw, 3rem);
+		font-weight: 800;
+		letter-spacing: -0.05em;
+		line-height: 1.05;
+		text-decoration-thickness: 0.05em;
+		text-underline-offset: 0.12em;
+		transition: text-underline-offset 0.25s ease;
+	}
+
+	.cta:hover {
+		color: var(--ink);
+		text-underline-offset: 0.22em;
+	}
+
+	.base {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 0.75rem 2rem;
+		padding-block: 1.5rem 2rem;
+		border-top: 1px solid var(--line);
+		font-size: var(--step--1);
+		color: var(--slate);
+	}
+
+	.base-links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem 1.5rem;
+	}
+
+	.base a {
+		color: var(--ink);
+	}
+</style>

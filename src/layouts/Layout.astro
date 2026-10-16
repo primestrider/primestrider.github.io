@@ -1,23 +1,194 @@
+---
+// Self-hosted variable font: no request to Google, and the Latin file is preloaded below
+import '@fontsource-variable/jetbrains-mono';
+import fontLatin from '@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2?url';
+
+interface Props {
+	title: string;
+	description: string;
+	image?: string;
+	noindex?: boolean;
+}
+
+const { title, description, image = '/og.jpg', noindex = false } = Astro.props;
+
+// Absolute URLs need `site` in astro.config.mjs; without it the URL-based tags are left out
+const site = Astro.site;
+const canonical = site && new URL(Astro.url.pathname, site).href;
+const imageUrl = site ? new URL(image, site).href : image;
+---
+
 <!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		{noindex && <meta name="robots" content="noindex" />}
+		<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+		<link rel="preload" href={fontLatin} as="font" type="font/woff2" crossorigin />
+		<link rel="icon" type="image/webp" href="/favicon.webp" />
+		<link rel="apple-touch-icon" href="/favicon.webp" />
+		{canonical && <link rel="canonical" href={canonical} />}
+
+		<!-- Link previews (WhatsApp, LinkedIn, X, Slack) -->
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={imageUrl} />
+		<meta property="og:image:width" content="1200" />
+		<meta property="og:image:height" content="630" />
+		<meta property="og:locale" content="en_US" />
+		{canonical && <meta property="og:url" content={canonical} />}
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={imageUrl} />
+
+		<slot name="head" />
+		<!-- Hide reveal targets only when JS runs, so content never stays hidden without it -->
+		<script is:inline>
+			document.documentElement.classList.add('js');
+			// If the reveal script never runs, show everything rather than leave it hidden
+			setTimeout(() => window.__revealReady || document.documentElement.classList.remove('js'), 3000);
+		</script>
 	</head>
 	<body>
 		<slot />
+		<script>
+			import '../scripts/motion';
+		</script>
 	</body>
 </html>
 
-<style>
-	html,
+<style is:global>
+	:root {
+		--paper: #ffffff;
+		--ink: #000000;
+		--slate: #5c5c5c;
+		--accent: #000000;
+		--line: #dcdcdc;
+		--tint: #f0f0f0;
+		--surface: #ffffff;
+
+		--step--1: 0.875rem;
+		--step-0: 1rem;
+		--step-1: 1.1875rem;
+		--step-2: 1.5rem;
+		--step-3: clamp(2.25rem, 1.6rem + 2.6vw, 3.5rem);
+
+		--gutter: clamp(1rem, 4vw, 3rem);
+		--max: 72rem;
+		color-scheme: light;
+	}
+
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--paper: #000000;
+			--ink: #ffffff;
+			--slate: #a3a3a3;
+			--accent: #ffffff;
+			--line: #2b2b2b;
+			--tint: #161616;
+			--surface: #0a0a0a;
+			color-scheme: dark;
+		}
+	}
+
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	html {
+		scroll-behavior: smooth;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		html {
+			scroll-behavior: auto;
+		}
+	}
+
 	body {
 		margin: 0;
-		width: 100%;
-		height: 100%;
+		background: var(--paper);
+		color: var(--ink);
+		font-family: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Code', Consolas, monospace;
+		font-size: var(--step-0);
+		line-height: 1.55;
+		-webkit-font-smoothing: antialiased;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	p,
+	ul,
+	dl,
+	dd {
+		margin: 0;
+	}
+
+	a {
+		color: inherit;
+		text-decoration-color: var(--accent);
+		text-decoration-thickness: 2px;
+		text-underline-offset: 0.2em;
+		transition:
+			color 0.2s ease,
+			text-underline-offset 0.2s ease;
+	}
+
+	a:hover {
+		color: var(--accent);
+		text-underline-offset: 0.35em;
+	}
+
+	/* Hover motion stays, but instant, for people who turn motion off */
+	@media (prefers-reduced-motion: reduce) {
+		*,
+		*::before,
+		*::after {
+			transition-duration: 0.01ms !important;
+		}
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--accent);
+		outline-offset: 3px;
+	}
+
+	/* Section names: large and tight, with an optional count in <sup> */
+	.heading {
+		font-size: clamp(2rem, 1.4rem + 2.6vw, 3.5rem);
+		font-weight: 800;
+		line-height: 1;
+		letter-spacing: -0.05em;
+		margin-bottom: clamp(1.75rem, 3.5vw, 3rem);
+	}
+
+	.heading sup {
+		font-size: 0.36em;
+		font-weight: 500;
+		letter-spacing: 0;
+		vertical-align: top;
+		margin-left: 0.25em;
+		color: var(--slate);
+	}
+
+	/* Motion targets stay hidden until src/scripts/motion.ts reveals them */
+	.js [data-hero],
+	.js [data-reveal],
+	.js .headline .w > span {
+		visibility: hidden;
+	}
+
+	::selection {
+		background: var(--tint);
 	}
 </style>

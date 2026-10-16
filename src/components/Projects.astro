@@ -1,0 +1,426 @@
+---
+import { profile, projects } from '../data/portfolio';
+
+// "Work, mobile app" → group "Work", type "mobile app"; groups keep their first-seen order
+const groups: { name: string; items: { p: (typeof projects)[number]; type: string }[] }[] = [];
+for (const p of projects) {
+	const [name, ...rest] = p.kind.split(',');
+	let group = groups.find((g) => g.name === name);
+	if (!group) groups.push((group = { name, items: [] }));
+	group.items.push({ p, type: rest.join(',').trim() });
+}
+---
+
+<section class="projects" id="projects" aria-labelledby="projects-h" data-projects>
+	<h2 id="projects-h" class="heading" data-reveal="heading">Projects</h2>
+
+	<!-- Tabs show one group at a time; the script reveals them. Without JS every group is listed. -->
+	<div class="tabs" role="tablist" aria-label="Project type" data-reveal hidden>
+		{
+			groups.map((g, i) => (
+				<button
+					type="button"
+					role="tab"
+					id={`project-tab-${i}`}
+					aria-controls={`project-group-${i}`}
+					aria-selected={i === 0 ? 'true' : 'false'}
+					tabindex={i === 0 ? 0 : -1}
+				>
+					{g.name}
+				</button>
+			))
+		}
+	</div>
+
+	<!-- Wide screens: names on the left, the chosen project in a sticky panel on the right.
+	     Small screens: the chosen project opens its detail in place. -->
+	<div class="work" data-work>
+		<div class="list" data-reveal="stagger">
+			{
+				groups.map((g, i) => (
+					<div class="group" id={`project-group-${i}`}>
+						<h3 class="group-h">{g.name}</h3>
+						<ul role="list">
+							{g.items.map(({ p, type }) => (
+								<li class="project">
+									<div class="row">
+										<h4 class="title">{p.title}</h4>
+										<p class="type">{type}</p>
+									</div>
+									<div class="detail">
+										<p class="summary">{p.summary}</p>
+										{p.stack && (
+											<ul class="stack" aria-label="Built with">
+												{p.stack.map((t) => (
+													<li>{t}</li>
+												))}
+											</ul>
+										)}
+										{p.links && p.links.length > 0 && (
+											<p class="links">
+												{p.links.map((l) => (
+													<a href={l.href} aria-label={`${l.label}: ${p.title}`}>
+														{l.label}
+													</a>
+												))}
+											</p>
+										)}
+									</div>
+								</li>
+							))}
+						</ul>
+					</div>
+				))
+			}
+		</div>
+		<aside class="panel" data-panel aria-live="polite" hidden></aside>
+	</div>
+
+	<p class="more" data-reveal><a href={profile.github}>See all repositories on GitHub</a></p>
+</section>
+
+<style>
+	.projects {
+		padding-block: clamp(4rem, 9vw, 7.5rem);
+	}
+
+	ul {
+		list-style: none;
+		padding: 0;
+	}
+
+	/* Tabs */
+	.tabs {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-bottom: clamp(1.75rem, 3.5vw, 2.75rem);
+	}
+
+	.tabs[hidden] {
+		display: none;
+	}
+
+	[role='tab'] {
+		font: inherit;
+		font-weight: 600;
+		padding: 0.6rem 1.1rem;
+		border: 0;
+		border-radius: 999px;
+		background: var(--tint);
+		color: var(--ink);
+		cursor: pointer;
+		transition:
+			background-color 0.2s ease,
+			color 0.2s ease;
+	}
+
+	[role='tab']:hover {
+		background: color-mix(in srgb, var(--ink) 14%, var(--paper));
+	}
+
+	[role='tab'][aria-selected='true'] {
+		background: var(--ink);
+		color: var(--paper);
+	}
+
+	/* List */
+	.group + .group {
+		margin-top: clamp(2rem, 4vw, 3rem);
+	}
+
+	.group-h {
+		font-size: var(--step-0);
+		font-weight: 600;
+		color: var(--slate);
+		margin-bottom: 0.5rem;
+	}
+
+	/* With tabs, the tab names the group, so its heading is kept for screen readers only */
+	.is-tabbed .group-h {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+
+	.is-tabbed .group + .group {
+		margin-top: 0;
+	}
+
+	.project {
+		padding-block: 1rem;
+	}
+
+	.row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: baseline;
+		gap: 0.25rem 1rem;
+	}
+
+	.title {
+		font-size: clamp(1.375rem, 1.1rem + 1.2vw, 2.25rem);
+		font-weight: 800;
+		line-height: 1.1;
+		letter-spacing: -0.045em;
+	}
+
+	.type {
+		color: var(--slate);
+		font-size: var(--step--1);
+	}
+
+	.detail {
+		display: grid;
+		gap: 0.9rem;
+		margin-top: 0.6rem;
+	}
+
+	.summary {
+		max-width: 44ch;
+	}
+
+	.stack {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+	}
+
+	.stack li {
+		padding: 0.3rem 0.75rem;
+		background: var(--tint);
+		border-radius: 999px;
+		font-size: var(--step--1);
+		font-weight: 550;
+	}
+
+	.links {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.25rem 1.25rem;
+		font-weight: 600;
+	}
+
+	/* Chosen vs. resting names, both layouts */
+	.is-tabbed .list .project {
+		cursor: pointer;
+		color: var(--slate);
+		transition: color 0.25s ease;
+	}
+
+	/* The shift sits on .row: GSAP owns the transform of .project itself */
+	.is-tabbed .list .row {
+		transition: translate 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+	}
+
+	.is-tabbed .list .project.is-active {
+		color: var(--ink);
+	}
+
+	.is-tabbed .list .project:focus-visible {
+		outline-offset: 6px;
+	}
+
+	/* Small screens: only the chosen project opens its detail */
+	@media (width < 56rem) {
+		.is-tabbed .list .project {
+			padding-block: 0.75rem;
+		}
+
+		.is-tabbed .list .project:not(.is-active) .detail {
+			display: none;
+		}
+
+		.is-tabbed .list .project.is-active {
+			padding-bottom: 1.5rem;
+		}
+	}
+
+	/* Wide screens: names left, sticky detail right */
+	.work.is-split {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+		gap: clamp(2.5rem, 5vw, 5rem);
+		align-items: start;
+	}
+
+	.is-split .list .detail {
+		display: none;
+	}
+
+	.is-split .list .project {
+		padding-block: 0.35rem;
+	}
+
+	.is-split .list .project.is-active .row {
+		translate: 1rem 0;
+	}
+
+	.is-split .list .type {
+		opacity: 0;
+		transition: opacity 0.25s ease;
+	}
+
+	.is-split .list .is-active .type {
+		opacity: 1;
+	}
+
+	.panel {
+		position: sticky;
+		top: 6rem;
+		display: flex;
+		flex-direction: column;
+		gap: 1.1rem;
+		min-height: 22rem;
+		padding: clamp(2rem, 4vw, 3.5rem);
+		background: var(--tint);
+	}
+
+	.panel[hidden] {
+		display: none;
+	}
+
+	.panel .type {
+		order: -1;
+		font-size: var(--step-0);
+	}
+
+	.panel .title {
+		font-size: clamp(2rem, 1.2rem + 2.4vw, 3.25rem);
+		letter-spacing: -0.05em;
+	}
+
+	/* Summary under the title; stack and links settle at the bottom of the panel */
+	.panel .detail {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+		margin-top: 0.25rem;
+	}
+
+	.panel .detail > :nth-child(2) {
+		margin-top: auto;
+	}
+
+	.panel .summary {
+		max-width: 32ch;
+		font-size: var(--step-1);
+		line-height: 1.45;
+	}
+
+	.panel .stack li {
+		background: var(--paper);
+	}
+
+	.more {
+		margin-top: clamp(2.5rem, 5vw, 4rem);
+		font-weight: 600;
+	}
+</style>
+
+<script>
+	import { gsap } from 'gsap';
+
+	const root = document.querySelector<HTMLElement>('[data-projects]');
+	const tablist = root?.querySelector<HTMLElement>('[role="tablist"]');
+	const work = root?.querySelector<HTMLElement>('[data-work]');
+	const panel = root?.querySelector<HTMLElement>('[data-panel]');
+	const tabs = root ? [...root.querySelectorAll<HTMLButtonElement>('[role="tab"]')] : [];
+	const groups = root ? [...root.querySelectorAll<HTMLElement>('.group')] : [];
+	const wide = matchMedia('(min-width: 56rem)');
+	const still = matchMedia('(prefers-reduced-motion: reduce)');
+	let current = 0;
+	let active: HTMLElement | undefined;
+
+	const itemsOf = (g: HTMLElement) => [...g.querySelectorAll<HTMLElement>(':scope > ul > .project')];
+	const animate = (targets: Element[], vars: gsap.TweenVars = {}) =>
+		!still.matches &&
+		gsap.fromTo(targets, { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.05, ...vars });
+
+	// Mark the chosen project; on wide screens copy its name, type and detail into the panel
+	function choose(item: HTMLElement, force = false) {
+		if (item === active && !force) return;
+		active?.classList.remove('is-active');
+		active?.removeAttribute('aria-current');
+		item.classList.add('is-active');
+		item.setAttribute('aria-current', 'true');
+		active = item;
+
+		if (wide.matches && panel) {
+			const parts = ['.title', '.type', '.detail'].map((s) => item.querySelector(s)!.cloneNode(true) as HTMLElement);
+			// The list already holds the heading; the panel repeats the name as plain text
+			const name = document.createElement('p');
+			for (const { name: n, value } of parts[0].attributes) if (n !== 'style') name.setAttribute(n, value);
+			name.textContent = parts[0].textContent;
+			parts[0] = name;
+			panel.replaceChildren(...parts);
+			animate(parts, { y: 18, duration: 0.55, stagger: 0.06 });
+		} else {
+			animate([...item.querySelectorAll('.detail > *')]);
+		}
+	}
+
+	function selectGroup(i: number, focus = false) {
+		current = i;
+		tabs.forEach((t, j) => {
+			t.setAttribute('aria-selected', String(j === i));
+			t.tabIndex = j === i ? 0 : -1;
+		});
+		groups.forEach((g, j) => (g.hidden = j !== i));
+		if (focus) tabs[i].focus();
+		const items = itemsOf(groups[i]);
+		choose(items[0], true);
+		animate(items);
+	}
+
+	function layout() {
+		if (!work || !panel) return;
+		work.classList.toggle('is-split', wide.matches);
+		panel.hidden = !wide.matches;
+		if (active) choose(active, true);
+	}
+
+	if (root && tablist && work && panel && tabs.length) {
+		root.classList.add('is-tabbed');
+		tablist.hidden = false;
+		groups.forEach((g, i) => {
+			g.setAttribute('role', 'tabpanel');
+			g.setAttribute('aria-labelledby', tabs[i].id);
+		});
+
+		tabs.forEach((t, i) => {
+			t.addEventListener('click', () => selectGroup(i));
+			// Arrow keys, Home and End move between tabs
+			t.addEventListener('keydown', (e) => {
+				const last = tabs.length - 1;
+				const next = { ArrowRight: i === last ? 0 : i + 1, ArrowLeft: i === 0 ? last : i - 1, Home: 0, End: last }[e.key];
+				if (next === undefined) return;
+				e.preventDefault();
+				selectGroup(next, true);
+			});
+		});
+
+		for (const g of groups) {
+			for (const item of itemsOf(g)) {
+				item.tabIndex = 0;
+				item.addEventListener('mouseenter', () => wide.matches && choose(item));
+				item.addEventListener('focus', () => choose(item));
+				item.addEventListener('click', () => choose(item));
+				// Enter jumps from a name to its first link
+				item.addEventListener('keydown', (e) => {
+					if (e.key !== 'Enter' || e.target !== item) return;
+					const scope = wide.matches ? panel : item;
+					scope.querySelector<HTMLElement>('a')?.focus();
+				});
+			}
+		}
+
+		wide.addEventListener('change', layout);
+		layout();
+		selectGroup(current);
+	}
+</script>

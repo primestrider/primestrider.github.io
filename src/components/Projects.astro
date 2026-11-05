@@ -9,13 +9,19 @@ for (const p of projects) {
 	if (!group) groups.push((group = { name, items: [] }));
 	group.items.push({ p, type: rest.join(',').trim() });
 }
+
+const num = (n: number) => String(n + 1).padStart(2, '0');
 ---
 
+<!--
+	Projects as an accordion: numbered rows between hairlines, the name large, one row open at a time
+	with its summary, stack and links. Without JS every row is listed open.
+-->
 <section class="projects" id="projects" aria-labelledby="projects-h" data-projects>
 	<div class="head">
 		<h2 id="projects-h" class="heading" data-reveal="heading">Projects</h2>
 
-		<!-- Tabs show one group at a time; the script reveals them. Without JS every group is listed. -->
+		<!-- A plain text filter, one group at a time; the script reveals it -->
 		<div class="tabs" role="tablist" aria-label="Project type" data-reveal hidden>
 			{
 				groups.map((g, i) => (
@@ -27,7 +33,8 @@ for (const p of projects) {
 						aria-selected={i === 0 ? 'true' : 'false'}
 						tabindex={i === 0 ? 0 : -1}
 					>
-						{g.name} <span class="count">{g.items.length}</span>
+						{g.name}
+						<sup class="count">{g.items.length}</sup>
 					</button>
 				))
 			}
@@ -40,35 +47,46 @@ for (const p of projects) {
 				<div class="group" id={`project-group-${i}`}>
 					<h3 class="group-h">{g.name}</h3>
 					{/* Only the first group reveals on scroll; the others animate when their tab opens */}
-					<ul role="list" class="cards" data-reveal={i === 0 ? 'stagger' : undefined}>
+					<ol role="list" class="rows" data-reveal={i === 0 ? 'stagger' : undefined}>
 						{g.items.map(({ p, type }, j) => (
-							<li class:list={['card', 'project', j === 0 && 'card-ink']}>
-								<p class="type">{type}</p>
-								<h4 class="title">{p.title}</h4>
-								<p class="summary">{p.summary}</p>
-								{(p.stack || p.links) && (
-									<div class="foot">
-										{p.stack && (
-											<ul class="stack" aria-label="Built with">
-												{p.stack.map((t) => (
-													<li>{t}</li>
-												))}
-											</ul>
-										)}
-										{p.links && p.links.length > 0 && (
-											<p class="links">
-												{p.links.map((l) => (
-													<a href={l.href} aria-label={`${l.label}: ${p.title}`}>
-														{l.label}
-													</a>
-												))}
-											</p>
-										)}
-									</div>
-								)}
+							<li class:list={['row', j === 0 && 'is-open']}>
+								<h4 class="row-h">
+									<button
+										type="button"
+										class="row-btn"
+										id={`row-${i}-${j}`}
+										aria-expanded="true"
+										aria-controls={`row-body-${i}-${j}`}
+										disabled
+									>
+										<span class="num">{num(j)}</span>
+										<span class="title">{p.title}</span>
+										<span class="type">{type}</span>
+										<span class="sign" aria-hidden="true" />
+									</button>
+								</h4>
+								<div class="body" id={`row-body-${i}-${j}`} role="region" aria-labelledby={`row-${i}-${j}`}>
+									<p class="summary">{p.summary}</p>
+									{p.stack && (
+										<ul class="stack" aria-label="Built with">
+											{p.stack.map((t) => (
+												<li>{t}</li>
+											))}
+										</ul>
+									)}
+									{p.links && p.links.length > 0 && (
+										<p class="links">
+											{p.links.map((l) => (
+												<a href={l.href} aria-label={`${l.label}: ${p.title}`}>
+													{l.label}
+												</a>
+											))}
+										</p>
+									)}
+								</div>
 							</li>
 						))}
-					</ul>
+					</ol>
 				</div>
 			))
 		}
@@ -82,30 +100,26 @@ for (const p of projects) {
 		padding-block: clamp(6rem, 12vw, 10rem) clamp(5rem, 10vw, 8rem);
 	}
 
-	ul {
+	ul,
+	ol {
 		list-style: none;
 		padding: 0;
 	}
 
-	/* Heading and tabs share one line */
 	.head {
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: space-between;
 		align-items: end;
 		gap: 1.5rem 3rem;
-		margin-bottom: clamp(2rem, 4vw, 3rem);
+		margin-bottom: clamp(2rem, 4vw, 3.5rem);
 	}
 
-	/* Tabs: a segmented control, the chosen segment filled with ink */
+	/* Filter: group names as text, the chosen one in ink over a thick rule */
 	.tabs {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.25rem;
-		padding: 0.3rem;
-		background: var(--surface);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-card);
+		gap: 0.25rem 1.75rem;
 	}
 
 	.tabs[hidden] {
@@ -113,34 +127,45 @@ for (const p of projects) {
 	}
 
 	[role='tab'] {
+		position: relative;
 		min-height: 2.75rem;
-		padding-inline: 1rem;
+		padding: 0;
 		border: 0;
-		border-radius: var(--radius-control);
 		background: transparent;
 		font: inherit;
 		font-weight: 800;
 		color: var(--slate);
 		white-space: nowrap;
 		cursor: pointer;
-		transition:
-			background-color 0.2s ease,
-			color 0.2s ease;
+		transition: color 0.2s ease;
 	}
 
-	[role='tab']:hover {
+	[role='tab']::after {
+		content: '';
+		position: absolute;
+		inset-inline: 0;
+		bottom: 0.35rem;
+		height: 3px;
+		background: currentColor;
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform 0.25s ease;
+	}
+
+	[role='tab']:hover,
+	[role='tab'][aria-selected='true'] {
 		color: var(--ink);
 	}
 
-	[role='tab'][aria-selected='true'] {
-		background: var(--ink);
-		color: var(--paper);
+	[role='tab'][aria-selected='true']::after {
+		transform: scaleX(1);
 	}
 
 	.count {
-		font-size: 0.75em;
+		margin-left: 0.15em;
+		font-size: 0.7em;
 		font-weight: 400;
-		vertical-align: super;
+		font-variant-numeric: tabular-nums;
 	}
 
 	/* Without JS every group shows under its own heading */
@@ -159,7 +184,7 @@ for (const p of projects) {
 		color: var(--slate);
 	}
 
-	/* With tabs, the tab names the group, so its heading is kept for screen readers only */
+	/* With the filter, it names the group, so the heading is kept for screen readers only */
 	.is-tabbed .group-h {
 		position: absolute;
 		width: 1px;
@@ -173,61 +198,151 @@ for (const p of projects) {
 		margin-top: 0;
 	}
 
-	/* Cards: three across on wide screens, the group's first project inverted */
-	.cards {
+	/* Rows between hairlines */
+	.rows {
+		border-bottom: 1px solid var(--line);
+	}
+
+	.row {
+		border-top: 1px solid var(--line);
+	}
+
+	.row-h {
+		font: inherit;
+	}
+
+	/* The row's button: number, name, type, and a plus that turns to a cross when open */
+	.row-btn {
 		display: grid;
-		gap: 1rem;
+		grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+		align-items: baseline;
+		gap: 0.25rem 1rem;
+		width: 100%;
+		padding: clamp(1.1rem, 2vw, 1.5rem) 0;
+		border: 0;
+		background: transparent;
+		font: inherit;
+		color: var(--ink);
+		text-align: start;
 	}
 
-	@media (min-width: 40rem) {
-		.cards {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
+	/* Without JS the buttons do nothing, so they read as plain headings */
+	.row-btn:disabled {
+		opacity: 1;
+		cursor: default;
 	}
 
-	@media (min-width: 64rem) {
-		.cards {
-			grid-template-columns: repeat(3, minmax(0, 1fr));
-		}
+	.is-accordion .row-btn {
+		cursor: pointer;
 	}
 
-	.project {
-		min-height: 17rem;
-	}
-
-	.type {
+	.num {
 		font-size: var(--step--1);
+		font-variant-numeric: tabular-nums;
 		color: var(--slate);
 	}
 
 	.title {
-		font-size: var(--step-2);
+		font-size: clamp(1.375rem, 1rem + 1.5vw, 2.25rem);
 		font-weight: 800;
 		line-height: 1.1;
 		letter-spacing: -0.03em;
 		overflow-wrap: break-word;
 		min-width: 0;
+		transition: transform 0.3s ease;
+	}
+
+	.type {
+		grid-column: 2;
+		font-size: var(--step--1);
+		color: var(--slate);
+	}
+
+	.sign {
+		display: none;
+	}
+
+	/* Wide screens: the type moves to the right of the name, before the sign */
+	@media (min-width: 48rem) {
+		.row-btn {
+			grid-template-columns: 3rem minmax(0, 1fr) auto auto;
+			gap: 1.5rem;
+		}
+
+		.type {
+			grid-column: auto;
+		}
+	}
+
+	.is-accordion .sign {
+		display: block;
+		grid-column: -2;
+		grid-row: 1;
+		position: relative;
+		width: 0.875rem;
+		height: 0.875rem;
+		align-self: center;
+		transition: transform 0.3s ease;
+	}
+
+	.is-accordion .sign::before,
+	.is-accordion .sign::after {
+		content: '';
+		position: absolute;
+		inset: 50% 0 auto;
+		height: 2px;
+		margin-top: -1px;
+		background: var(--ink);
+	}
+
+	.is-accordion .sign::after {
+		transform: rotate(90deg);
+	}
+
+	.is-accordion .is-open .sign {
+		transform: rotate(45deg);
+	}
+
+	/* Hover: closed names nudge right a step, the way a cursor moves along a list */
+	.is-accordion .row:not(.is-open) .row-btn:hover .title {
+		transform: translateX(0.5rem);
+	}
+
+	/* The open row's details, indented under the name */
+	.body {
+		display: grid;
+		gap: 0.75rem 2.5rem;
+		padding: 0 0 clamp(1.5rem, 3vw, 2.25rem) 3.5rem;
+	}
+
+	.body[hidden] {
+		display: none;
+	}
+
+	@media (min-width: 48rem) {
+		.body {
+			grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 3fr);
+			align-items: start;
+			padding-left: 4.5rem;
+		}
 	}
 
 	.summary {
-		max-width: 40ch;
+		max-width: 46ch;
 	}
 
-	/* Stack and links settle at the bottom of the card, over a hairline */
-	.foot {
-		display: grid;
-		gap: 0.9rem;
-		margin-top: auto;
-		padding-top: 1rem;
-		border-top: 1px solid var(--line);
-	}
-
+	/* The stack as a slash-separated line, the way a developer would write it */
 	.stack {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.25rem 1rem;
 		font-size: var(--step--1);
 		color: var(--slate);
+	}
+
+	.stack li + li::before {
+		content: '/';
+		padding-inline: 0.5em;
+		opacity: 0.5;
 	}
 
 	.links {
@@ -252,6 +367,26 @@ for (const p of projects) {
 	const groups = root ? [...root.querySelectorAll<HTMLElement>('.group')] : [];
 	const still = matchMedia('(prefers-reduced-motion: reduce)');
 
+	function setOpen(row: HTMLElement, open: boolean) {
+		row.classList.toggle('is-open', open);
+		row.querySelector('.row-btn')!.setAttribute('aria-expanded', String(open));
+		row.querySelector<HTMLElement>('.body')!.hidden = !open;
+	}
+
+	// Open one row and close the others in its list; clicking the open row closes it.
+	// The height snaps; only the details fade in.
+	function toggleRow(row: HTMLElement) {
+		const opening = !row.classList.contains('is-open');
+		for (const r of row.parentElement!.children as HTMLCollectionOf<HTMLElement>) setOpen(r, opening && r === row);
+		if (opening && !still.matches) {
+			gsap.fromTo(
+				row.querySelectorAll('.body > *'),
+				{ autoAlpha: 0, y: 8 },
+				{ autoAlpha: 1, y: 0, duration: 0.45, ease: 'power3.out', stagger: 0.05 },
+			);
+		}
+	}
+
 	function selectGroup(i: number, focus = false) {
 		tabs.forEach((t, j) => {
 			t.setAttribute('aria-selected', String(j === i));
@@ -259,10 +394,24 @@ for (const p of projects) {
 		});
 		groups.forEach((g, j) => (g.hidden = j !== i));
 		if (focus) tabs[i].focus();
-		const cards = [...groups[i].querySelectorAll('.project')];
 		if (!still.matches) {
-			gsap.fromTo(cards, { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.05 });
+			gsap.fromTo(
+				groups[i].querySelectorAll('.row'),
+				{ autoAlpha: 0, y: 16 },
+				{ autoAlpha: 1, y: 0, duration: 0.5, ease: 'power3.out', stagger: 0.04 },
+			);
 		}
+	}
+
+	if (root) {
+		// Accordion: the first row of each list open, the others closed
+		root.classList.add('is-accordion');
+		root.querySelectorAll<HTMLElement>('.row').forEach((row) => {
+			const btn = row.querySelector<HTMLButtonElement>('.row-btn')!;
+			btn.disabled = false;
+			setOpen(row, row.classList.contains('is-open'));
+			btn.addEventListener('click', () => toggleRow(row));
+		});
 	}
 
 	if (root && tablist && tabs.length) {

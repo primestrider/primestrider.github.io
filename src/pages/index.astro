@@ -56,7 +56,7 @@ const schema = {
 			<Hero />
 		</div>
 
-		<!-- About: a bento, the statement as one dark card beside a column of experience cards -->
+		<!-- About: the statement as one dark card beside the experience list -->
 		<section class="wrap section" id="about" aria-labelledby="about-h">
 			<h2 id="about-h" class="heading section-h" data-reveal="heading">About</h2>
 
@@ -71,7 +71,7 @@ const schema = {
 					<ol class="exp-list" data-reveal="stagger">
 						{
 							experience.map((e) => (
-								<li class="card exp-card">
+								<li class="exp-row">
 									<span class="when">{e.years}</span>
 									<span class="what">{e.role}</span>
 									<span class="where">{e.place}</span>
@@ -293,17 +293,24 @@ const schema = {
 		font-size: 0.75em;
 	}
 
+	/* Experience: a list between hairlines, its rows sharing the statement card's height */
 	.exp-list {
 		flex: 1;
 		display: grid;
-		gap: 1rem;
+		grid-auto-rows: 1fr;
 		list-style: none;
 		padding: 0;
+		border-bottom: 1px solid var(--line);
 	}
 
-	.exp-card {
+	.exp-row {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
 		gap: 0.35rem;
-		justify-content: end;
+		min-width: 0;
+		padding-block: 1.25rem;
+		border-top: 1px solid var(--line);
 	}
 
 	.what {

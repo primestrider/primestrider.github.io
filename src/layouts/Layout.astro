@@ -94,11 +94,6 @@ const imageUrl = site ? new URL(image, site).href : image;
 		--band-line: oklch(32% 0.005 95);
 		--band-surface: oklch(21% 0.005 95);
 
-		/* An inverted card on the page paper */
-		--inv-paper: oklch(17% 0.005 95);
-		--inv-ink: oklch(97% 0.004 95);
-		--inv-slate: oklch(74% 0.005 95);
-		--inv-line: oklch(34% 0.005 95);
 
 		--radius-card: 1rem;
 		--radius-control: 0.5rem;
@@ -133,10 +128,6 @@ const imageUrl = site ? new URL(image, site).href : image;
 			--band-line: oklch(31% 0.005 95);
 			--band-surface: oklch(22.5% 0.005 95);
 
-			--inv-paper: oklch(95% 0.004 95);
-			--inv-ink: oklch(15% 0.005 95);
-			--inv-slate: oklch(42% 0.005 95);
-			--inv-line: oklch(84% 0.005 95);
 			color-scheme: dark;
 		}
 	}
@@ -246,18 +237,6 @@ const imageUrl = site ? new URL(image, site).href : image;
 		color: var(--ink);
 		border: 1px solid var(--line);
 		border-radius: var(--radius-card);
-	}
-
-	/* The inverted card swaps every ink token, so links and focus rings swap with it */
-	.card-ink {
-		--paper: var(--inv-paper);
-		--ink: var(--inv-ink);
-		--slate: var(--inv-slate);
-		--line: var(--inv-line);
-		--surface: var(--inv-paper);
-		--accent: var(--inv-ink);
-		color: var(--ink);
-		border-color: var(--paper);
 	}
 
 	/* Motion targets stay hidden until src/scripts/motion.ts reveals them */

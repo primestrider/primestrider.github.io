@@ -56,12 +56,12 @@ const schema = {
 			<Hero />
 		</div>
 
-		<!-- About: the statement as one dark card beside the experience list -->
+		<!-- About: the statement set large over a hairline, beside the experience list -->
 		<section class="wrap section" id="about" aria-labelledby="about-h">
 			<h2 id="about-h" class="heading section-h" data-reveal="heading">About</h2>
 
 			<div class="bento">
-				<div class="card card-ink statement-card" data-reveal>
+				<div class="statement-block" data-reveal>
 					<p class="where-from">{profile.city}</p>
 					<p class="statement">{about}</p>
 				</div>
@@ -245,10 +245,10 @@ const schema = {
 		margin-bottom: clamp(2rem, 4vw, 3rem);
 	}
 
-	/* About: the statement card takes two thirds, the experience column the rest */
+	/* About: the statement takes two thirds, the experience column the rest; no boxes, only hairlines */
 	.bento {
 		display: grid;
-		gap: 1rem;
+		gap: 3rem clamp(2rem, 5vw, 4.5rem);
 	}
 
 	@media (min-width: 52rem) {
@@ -257,11 +257,15 @@ const schema = {
 		}
 	}
 
-	.statement-card {
+	.statement-block {
+		display: flex;
+		flex-direction: column;
 		justify-content: space-between;
 		gap: 3rem;
-		min-height: 22rem;
-		padding: clamp(1.75rem, 4vw, 3.5rem);
+		min-width: 0;
+		min-height: 20rem;
+		padding-top: 1.25rem;
+		border-top: 1px solid var(--line);
 	}
 
 	.where-from {

@@ -12,21 +12,23 @@ export const profile = {
 };
 
 export const about =
-	'For over three years I’ve built web and mobile apps for companies, clients, and my own projects.';
+	'For over four years I’ve built web and mobile apps for companies, clients, and my own projects.';
 
 export const experience = [
 	{ role: 'Frontend Developer', place: 'PT Reka Multi Aptika, Jakarta', years: '2022–present' },
-	{ role: 'Frontend Developer', place: 'Freelance', years: '2024–present' },
+	{ role: 'Software Developer', place: 'Freelance', years: '2024–present' },
 	{ role: 'Laboratory Assistant', place: 'Multimedia Nusantara University', years: '2020–2022' },
 ];
 
 export const skillGroups = [
 	{
 		title: 'Frontend',
-		skills: ['TypeScript', 'JavaScript', 'Vue.js', 'Nuxt', 'React', 'Astro', 'Tailwind CSS', 'PWA', 'TanStack Query', 'Axios', 'Zod'],
+		skills: ['TypeScript', 'JavaScript', 'Vue.js', 'Nuxt', 'React', 'Astro', 'Tailwind CSS', 'Pinia', 'PWA', 'TanStack Query', 'Axios', 'Zod'],
 	},
 	{ title: 'Mobile', skills: ['React Native', 'Expo', 'Ionic'] },
-	{ title: 'Backend & data', skills: ['Node.js', 'Express', 'NestJS', 'MySQL'] },
+	{ title: 'Backend & data', skills: ['Node.js', 'Express', 'NestJS', 'MySQL', 'Drizzle ORM', 'Prisma ORM'] },
+	{ title: 'Testing', skills: ['Vitest', 'Supertest'] },
+	{ title: 'AI tools', skills: ['Claude', 'Cursor', 'ChatGPT', 'Agent skills'] },
 	{ title: 'Tools', skills: ['Git', 'Docker', 'Postman', 'Jira'] },
 ];
 
@@ -63,6 +65,14 @@ export const projects: {
 		title: 'Bersimpul',
 		kind: 'Freelance, website',
 		summary: 'A website for creating and sharing digital wedding invitations.',
+	},
+	{
+		title: 'Kesan',
+		kind: 'Personal, full-stack web app',
+		summary:
+			'A platform for making digital invitations, with a block editor, themes, QRIS payment, and RSVP tracking.',
+		stack: ['Vue', 'Astro', 'Express', 'MySQL', 'Drizzle ORM'],
+		links: [{ label: 'Open site', href: 'https://kesan.space' }],
 	},
 	{
 		title: 'Trade Plan',

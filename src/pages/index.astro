@@ -39,7 +39,6 @@ const schema = {
 
 <Layout title={title} description={description}>
 	<script slot="head" type="application/ld+json" set:html={JSON.stringify(schema)} />
-	<!-- Fixed frosted bar -->
 	<header class="top">
 		<div class="wrap top-inner">
 			<a class="brand" href="#"><img src="/logo.webp" width="140" height="96" alt={profile.name} /></a>
@@ -57,37 +56,43 @@ const schema = {
 			<Hero />
 		</div>
 
-		<!-- About: one statement, then a full-width experience index -->
+		<!-- About: a bento, the statement as one dark card beside a column of experience cards -->
 		<section class="wrap section" id="about" aria-labelledby="about-h">
-			<h2 id="about-h" class="heading" data-reveal="heading">About</h2>
-			<p class="statement" data-reveal>{about}</p>
+			<h2 id="about-h" class="heading section-h" data-reveal="heading">About</h2>
 
-			<h3 class="label index-h" data-reveal>Experience <sup>({experience.length})</sup></h3>
-			<ol class="index" data-reveal="stagger">
-				{
-					experience.map((e) => (
-						<li>
-							<span class="what">{e.role}</span>
-							<span class="where">{e.place}</span>
-							<span class="when">{e.years}</span>
-						</li>
-					))
-				}
-			</ol>
+			<div class="bento">
+				<div class="card card-ink statement-card" data-reveal>
+					<p class="where-from">{profile.city}</p>
+					<p class="statement">{about}</p>
+				</div>
+
+				<div class="exp">
+					<h3 class="exp-h" data-reveal>Experience <sup>({experience.length})</sup></h3>
+					<ol class="exp-list" data-reveal="stagger">
+						{
+							experience.map((e) => (
+								<li class="card exp-card">
+									<span class="when">{e.years}</span>
+									<span class="what">{e.role}</span>
+									<span class="where">{e.place}</span>
+								</li>
+							))
+						}
+					</ol>
+				</div>
+			</div>
 		</section>
 
-		<!-- Skills: inverted band with grouped badges -->
+		<!-- Skills: one card per group, sized by how much it holds -->
 		<section class="band" id="skills" aria-labelledby="skills-h">
 			<div class="wrap section">
-				<h2 id="skills-h" class="heading" data-reveal="heading">Skills</h2>
+				<h2 id="skills-h" class="heading section-h" data-reveal="heading">Skills</h2>
 				<div class="skills" data-reveal="stagger">
 					{
-						skillGroups.map((group, i) => (
-							<div class="group">
-								<h3>
-									{group.title}
-								</h3>
-								<ul class="badges">
+						skillGroups.map((group) => (
+							<div class:list={['card', 'skill-card', group.skills.length >= 10 ? 'is-lg' : group.skills.length >= 4 && 'is-md']}>
+								<h3>{group.title}</h3>
+								<ul>
 									{group.skills.map((s) => (
 										<li>{s}</li>
 									))}
@@ -106,10 +111,13 @@ const schema = {
 
 	<!-- Contact: inverted footer where the LinkedIn link is the headline -->
 	<footer class="band contact" id="contact" aria-labelledby="contact-h">
-		<div class="wrap section">
-			<h2 id="contact-h" class="label" data-reveal>Contact</h2>
-			<p class="ask" data-reveal>Have a project or a role that fits?</p>
-			<a class="cta" href={profile.linkedin} data-reveal>Message me on LinkedIn</a>
+		<div class="wrap section split">
+			<h2 id="contact-h" class="heading" data-reveal="heading">Contact</h2>
+			<div class="card reach" data-reveal>
+				<p class="ask">{profile.status} Have a project or a role that fits?</p>
+				<a class="cta" href={profile.linkedin}>Message me on LinkedIn</a>
+				<p class="clock" hidden>It is <time data-clock></time> in Jakarta.</p>
+			</div>
 		</div>
 		<div class="wrap base">
 			<p>&copy; {year} {profile.name}</p>
@@ -122,20 +130,34 @@ const schema = {
 	</footer>
 </Layout>
 
+<script>
+	// Live Jakarta time; stays hidden if the browser can't format it
+	const clock = document.querySelector<HTMLTimeElement>('[data-clock]');
+	if (clock) {
+		const fmt = new Intl.DateTimeFormat('en-GB', {
+			timeZone: 'Asia/Jakarta',
+			hour: '2-digit',
+			minute: '2-digit',
+		});
+		const tick = () => (clock.textContent = `${fmt.format(new Date())} WIB`);
+		tick();
+		clock.parentElement!.hidden = false;
+		setInterval(tick, 30_000);
+	}
+</script>
+
 <style>
 	.wrap {
 		width: min(100% - 2 * var(--gutter), var(--max));
 		margin-inline: auto;
 	}
 
-	/* Frosted bar: content scrolling underneath shows through, blurred */
+	/* A plain fixed bar: the PS mark and four section links */
 	.top {
 		position: fixed;
 		inset: 0 0 auto;
 		z-index: 10;
-		background: color-mix(in srgb, var(--paper) 70%, transparent);
-		-webkit-backdrop-filter: blur(16px) saturate(1.4);
-		backdrop-filter: blur(16px) saturate(1.4);
+		background: var(--paper);
 		border-bottom: 1px solid var(--line);
 	}
 
@@ -143,9 +165,10 @@ const schema = {
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: space-between;
-		align-items: baseline;
+		align-items: center;
 		gap: 0.5rem 1.5rem;
-		padding-block: 1rem;
+		min-height: 3.5rem;
+		padding-block: 0.5rem;
 	}
 
 	.top a {
@@ -153,15 +176,10 @@ const schema = {
 	}
 
 	/* The logo file is a white mark on transparency; invert it to black on light pages */
-	.brand {
-		display: block;
-		align-self: center;
-	}
-
 	.brand img {
 		display: block;
 		width: auto;
-		height: 1.75rem;
+		height: 1.5rem;
 		filter: invert(1);
 	}
 
@@ -174,11 +192,19 @@ const schema = {
 	nav {
 		display: flex;
 		flex-wrap: wrap;
-		gap: 0.25rem 1.25rem;
+		gap: 0.25rem 1.5rem;
+		font-size: var(--step--1);
 	}
 
 	nav a {
 		position: relative;
+		color: var(--slate);
+		white-space: nowrap;
+		transition: color 0.2s ease;
+	}
+
+	nav a:hover {
+		color: var(--ink);
 	}
 
 	nav a::after {
@@ -199,77 +225,91 @@ const schema = {
 	}
 
 	.section {
-		padding-block: clamp(4rem, 9vw, 7.5rem);
+		padding-block: clamp(5rem, 10vw, 8.5rem);
 	}
 
-	/* Small sub-labels inside a section */
-	.label {
-		font-size: var(--step-0);
-		font-weight: 600;
+	/* Section name on the left third, its content on the right two thirds */
+	.split {
+		display: grid;
+		gap: 1.5rem 3rem;
+	}
+
+	@media (min-width: 52rem) {
+		.split {
+			grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+			align-items: start;
+		}
+	}
+
+	.section-h {
+		margin-bottom: clamp(2rem, 4vw, 3rem);
+	}
+
+	/* About: the statement card takes two thirds, the experience column the rest */
+	.bento {
+		display: grid;
+		gap: 1rem;
+	}
+
+	@media (min-width: 52rem) {
+		.bento {
+			grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+		}
+	}
+
+	.statement-card {
+		justify-content: space-between;
+		gap: 3rem;
+		min-height: 22rem;
+		padding: clamp(1.75rem, 4vw, 3.5rem);
+	}
+
+	.where-from {
 		color: var(--slate);
-		margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
 	}
 
-	.label sup {
-		font-size: 0.7em;
-		vertical-align: super;
-	}
-
-	/* About */
 	.statement {
-		max-width: 30ch;
-		font-size: clamp(1.25rem, 0.95rem + 1.3vw, 2rem);
-		font-weight: 600;
-		line-height: 1.2;
-		letter-spacing: -0.035em;
+		max-width: 22ch;
+		font-size: clamp(1.75rem, 1rem + 2.4vw, 3rem);
+		font-weight: 800;
+		line-height: 1.12;
+		letter-spacing: -0.03em;
+		text-wrap: pretty;
 	}
 
-	.index-h {
-		margin-top: clamp(3.5rem, 7vw, 5.5rem);
-		margin-bottom: 0;
-		padding-bottom: 0.75rem;
-		border-bottom: 2px solid var(--ink);
+	.exp {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
 	}
 
-	.index {
+	.exp-h {
+		font-size: var(--step-0);
+		font-weight: 400;
+		color: var(--slate);
+	}
+
+	.exp-h sup {
+		font-size: 0.75em;
+	}
+
+	.exp-list {
+		flex: 1;
+		display: grid;
+		gap: 1rem;
 		list-style: none;
 		padding: 0;
 	}
 
-	.index li {
-		display: grid;
-		gap: 0.25rem 2rem;
-		padding: 1.5rem 0;
-		border-bottom: 1px solid var(--line);
-		transition:
-			padding 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-			background-color 0.3s ease,
-			color 0.3s ease;
-	}
-
-	.index li:hover {
-		--slate: #8f8f8f;
-		padding-inline: 1rem;
-		background: var(--ink);
-		color: var(--paper);
-	}
-
-	@media (min-width: 48rem) {
-		.index li {
-			grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) 9rem;
-			align-items: baseline;
-		}
-
-		.index .when {
-			text-align: right;
-		}
+	.exp-card {
+		gap: 0.35rem;
+		justify-content: end;
 	}
 
 	.what {
-		font-size: clamp(1.125rem, 1rem + 0.5vw, 1.375rem);
+		font-size: var(--step-1);
 		font-weight: 800;
-		letter-spacing: -0.035em;
-		line-height: 1.15;
+		line-height: 1.25;
 	}
 
 	.where,
@@ -278,90 +318,124 @@ const schema = {
 	}
 
 	.when {
+		font-size: var(--step--1);
 		font-variant-numeric: tabular-nums;
-		white-space: nowrap;
 	}
 
-	/* Inverted bands (skills and footer) */
+	/* Inverted bands (skills and footer) take the band tokens */
 	.band {
-		--ink: #ffffff;
-		--slate: #a3a3a3;
-		--line: rgb(255 255 255 / 0.22);
-		--accent: #ffffff;
-		--paper: #000000;
-		background: #000000;
+		--paper: var(--band-paper);
+		--ink: var(--band-ink);
+		--slate: var(--band-slate);
+		--line: var(--band-line);
+		--surface: var(--band-surface);
+		background: var(--paper);
 		color: var(--ink);
 	}
 
-	@media (prefers-color-scheme: dark) {
-		.band {
-			border-top: 1px solid var(--line);
+	/* Skills: a packed grid; the biggest group takes a 2 by 2 card, mid-sized groups a wide one */
+	.skills {
+		display: grid;
+		grid-auto-flow: dense;
+		gap: 1rem;
+	}
+
+	@media (min-width: 40rem) {
+		.skills {
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+		}
+
+		.skill-card.is-lg {
+			grid-column: span 2;
 		}
 	}
 
-	.skills {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
-		gap: 2.5rem;
+	@media (min-width: 64rem) {
+		.skills {
+			grid-template-columns: repeat(4, minmax(0, 1fr));
+		}
+
+		.skill-card.is-lg {
+			grid-row: span 2;
+		}
+
+		.skill-card.is-md {
+			grid-column: span 2;
+		}
 	}
 
-	.group h3 {
+	.skill-card {
+		gap: 1.25rem;
+	}
+
+	.skill-card h3 {
 		font-size: var(--step-1);
-		font-weight: 700;
-		letter-spacing: -0.02em;
-		padding-bottom: 0.6rem;
-		border-bottom: 2px solid var(--ink);
+		font-weight: 800;
 	}
 
-	.badges {
+	.skill-card ul {
 		list-style: none;
 		padding: 0;
-		margin-top: 1rem;
 		display: flex;
 		flex-wrap: wrap;
 		gap: 0.5rem;
 	}
 
-	.badges li {
-		padding: 0.35rem 0.8rem;
+	.skill-card li {
+		padding: 0.3rem 0.7rem;
 		border: 1px solid var(--line);
-		border-radius: 999px;
+		border-radius: var(--radius-control);
 		font-size: var(--step--1);
-		font-weight: 550;
-		line-height: 1.3;
-		transition:
-			background-color 0.2s ease,
-			color 0.2s ease,
-			border-color 0.2s ease;
 	}
 
-	.badges li:hover {
-		background: var(--ink);
-		color: var(--paper);
-		border-color: var(--ink);
+	/* The 2 by 2 card sets its skills a step larger, so it reads as the lead group */
+	@media (min-width: 64rem) {
+		.skill-card.is-lg {
+			justify-content: space-between;
+		}
+
+		.skill-card.is-lg h3 {
+			font-size: var(--step-2);
+		}
+
+		.skill-card.is-lg li {
+			font-size: var(--step-0);
+			padding: 0.4rem 0.85rem;
+		}
 	}
 
 	/* Contact */
-	.ask {
-		font-size: var(--step-1);
-		color: var(--slate);
-		margin-bottom: 1rem;
+	.reach {
+		container-type: inline-size;
+		gap: 1.25rem;
+		align-items: start;
+		padding: clamp(1.75rem, 4vw, 3rem);
 	}
 
+	.ask {
+		max-width: 40ch;
+		font-size: var(--step-1);
+		color: var(--slate);
+	}
+
+	/* Sized from its column so the one line never wraps, 320px included */
 	.cta {
-		display: inline-block;
-		font-size: clamp(1.625rem, 1rem + 2.4vw, 3rem);
+		font-size: min(3.5rem, 100cqi / 13.5);
 		font-weight: 800;
-		letter-spacing: -0.05em;
-		line-height: 1.05;
-		text-decoration-thickness: 0.05em;
-		text-underline-offset: 0.12em;
-		transition: text-underline-offset 0.25s ease;
+		line-height: 1.1;
+		letter-spacing: -0.03em;
+		white-space: nowrap;
+		text-decoration-thickness: 0.06em;
+		text-underline-offset: 0.15em;
 	}
 
 	.cta:hover {
-		color: var(--ink);
-		text-underline-offset: 0.22em;
+		text-underline-offset: 0.25em;
+	}
+
+	.clock {
+		color: var(--slate);
+		font-variant-numeric: tabular-nums;
 	}
 
 	.base {

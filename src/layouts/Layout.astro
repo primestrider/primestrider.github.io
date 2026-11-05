@@ -28,8 +28,9 @@ const imageUrl = site ? new URL(image, site).href : image;
 		<!-- Google Search Console ownership; keep it, Google re-checks periodically -->
 		<meta name="google-site-verification" content="R74LGqAfR2h_lMaQU2JE1gm6bjGod6Bi0GfS0KbmTCM" />
 		{noindex && <meta name="robots" content="noindex" />}
-		<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-		<meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+		<!-- Matches --paper in each scheme -->
+		<meta name="theme-color" content="#f8f8f5" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#0b0b09" media="(prefers-color-scheme: dark)" />
 		<link rel="preload" href={fontLatin} as="font" type="font/woff2" crossorigin />
 		<link rel="icon" type="image/webp" href="/favicon.webp" />
 		<link rel="apple-touch-icon" href="/favicon.webp" />
@@ -66,20 +67,51 @@ const imageUrl = site ? new URL(image, site).href : image;
 </html>
 
 <style is:global>
+	/* Hallmark · redesign: full · genre: editorial (inferred) · theme: brand (black and white, JetBrains Mono, the PS mark) · hero: Settled · nav: fixed bar, the PS mark left and four section links right · footer: inverted contact band over a base line of links · signature: the intro set large under the handle, over one rule · job: hire · v2.0.0 */
+	/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V4 · weakest: R, cards everywhere risk a template; the bento varies sizes by content (the statement two thirds, Frontend 2 by 2) and only one card per block is inverted */
+	/* Hallmark · waive 64 · body and display are both JetBrains Mono · mono is the brand face of this developer portfolio, set everywhere on purpose */
+	/* Hallmark · waive 26b · no form controls, no aria-disabled · links and the project tab buttons take hover, active and focus here; nothing on this portfolio is ever disabled */
+	/* Hallmark · waive 39b · a.cta is the footer headline set as a text link, not a button · the LinkedIn link is the contact section itself */
+	/* Hallmark · waive 79 · hero content centred in a Settled screen · the owner asked for the primestrider name small, so the hero keeps air instead of a giant handle */
+	/* Hallmark · reworded the h1 "primestrider Software developer based in Jakarta, Indonesia" to the same words set as name over role · 58 named the three text blocks before the hero actions; the status line moved to the contact band */
+	/* Hallmark · dismissed kept 13:40 · the live Jakarta clock moved to the contact band and reads a new minute on every load */
+	/* Hallmark · dismissed 49 · the project tabs set white-space: nowrap on [role=tab] */
+	/* Hallmark · dropped [data-work], [data-panel] · the owner asked for project cards, so the sticky detail panel and its list became one card grid */
+
 	:root {
-		--paper: #ffffff;
-		--ink: #000000;
-		--slate: #5c5c5c;
-		--accent: #000000;
-		--line: #dcdcdc;
-		--tint: #f0f0f0;
-		--surface: #ffffff;
+		/* Near-black and near-white: still black and white, without the pure absolutes */
+		--paper: oklch(98% 0.004 95);
+		--ink: oklch(17% 0.005 95);
+		--slate: oklch(46% 0.005 95);
+		--line: oklch(87% 0.005 95);
+		--surface: oklch(95% 0.004 95);
+		--accent: var(--ink);
+
+		/* The inverted band (skills and contact) */
+		--band-paper: oklch(17% 0.005 95);
+		--band-ink: oklch(97% 0.004 95);
+		--band-slate: oklch(74% 0.005 95);
+		--band-line: oklch(32% 0.005 95);
+		--band-surface: oklch(21% 0.005 95);
+
+		/* An inverted card on the page paper */
+		--inv-paper: oklch(17% 0.005 95);
+		--inv-ink: oklch(97% 0.004 95);
+		--inv-slate: oklch(74% 0.005 95);
+		--inv-line: oklch(34% 0.005 95);
+
+		--radius-card: 1rem;
+		--radius-control: 0.5rem;
+
+		/* One mono family carries display and body alike */
+		--font-body: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Code', Consolas, monospace;
+		--font-display: var(--font-body);
 
 		--step--1: 0.875rem;
 		--step-0: 1rem;
 		--step-1: 1.1875rem;
-		--step-2: 1.5rem;
-		--step-3: clamp(2.25rem, 1.6rem + 2.6vw, 3.5rem);
+		--step-2: clamp(1.375rem, 1.1rem + 1.1vw, 2rem);
+		--step-section: clamp(2.5rem, 1.6rem + 3vw, 4rem);
 
 		--gutter: clamp(1rem, 4vw, 3rem);
 		--max: 72rem;
@@ -88,13 +120,23 @@ const imageUrl = site ? new URL(image, site).href : image;
 
 	@media (prefers-color-scheme: dark) {
 		:root {
-			--paper: #000000;
-			--ink: #ffffff;
-			--slate: #a3a3a3;
-			--accent: #ffffff;
-			--line: #2b2b2b;
-			--tint: #161616;
-			--surface: #0a0a0a;
+			--paper: oklch(13% 0.004 95);
+			--ink: oklch(96% 0.004 95);
+			--slate: oklch(70% 0.005 95);
+			--line: oklch(27% 0.005 95);
+			--surface: oklch(18% 0.005 95);
+
+			/* In dark mode the band lifts a step instead of inverting */
+			--band-paper: oklch(18% 0.005 95);
+			--band-ink: oklch(96% 0.004 95);
+			--band-slate: oklch(72% 0.005 95);
+			--band-line: oklch(31% 0.005 95);
+			--band-surface: oklch(22.5% 0.005 95);
+
+			--inv-paper: oklch(95% 0.004 95);
+			--inv-ink: oklch(15% 0.005 95);
+			--inv-slate: oklch(42% 0.005 95);
+			--inv-line: oklch(84% 0.005 95);
 			color-scheme: dark;
 		}
 	}
@@ -106,7 +148,9 @@ const imageUrl = site ? new URL(image, site).href : image;
 	}
 
 	html {
+		overflow-x: clip;
 		scroll-behavior: smooth;
+		scroll-padding-top: 4.5rem;
 	}
 
 	@media (prefers-reduced-motion: reduce) {
@@ -117,9 +161,10 @@ const imageUrl = site ? new URL(image, site).href : image;
 
 	body {
 		margin: 0;
+		overflow-x: clip;
 		background: var(--paper);
 		color: var(--ink);
-		font-family: 'JetBrains Mono Variable', ui-monospace, 'Cascadia Code', Consolas, monospace;
+		font-family: var(--font-body);
 		font-size: var(--step-0);
 		line-height: 1.55;
 		-webkit-font-smoothing: antialiased;
@@ -131,24 +176,40 @@ const imageUrl = site ? new URL(image, site).href : image;
 	h4,
 	p,
 	ul,
+	ol,
 	dl,
 	dd {
 		margin: 0;
 	}
 
+	h1,
+	h2,
+	h3 {
+		text-wrap: balance;
+		overflow-wrap: break-word;
+		min-width: 0;
+	}
+
 	a {
 		color: inherit;
 		text-decoration-color: var(--accent);
-		text-decoration-thickness: 2px;
-		text-underline-offset: 0.2em;
-		transition:
-			color 0.2s ease,
-			text-underline-offset 0.2s ease;
+		text-decoration-thickness: 1.5px;
+		text-underline-offset: 0.25em;
+		transition: text-underline-offset 0.2s ease;
 	}
 
 	a:hover {
-		color: var(--accent);
-		text-underline-offset: 0.35em;
+		text-underline-offset: 0.4em;
+	}
+
+	a:active,
+	button:active {
+		opacity: 0.7;
+	}
+
+	button:disabled {
+		opacity: 0.4;
+		cursor: not-allowed;
 	}
 
 	/* Hover motion stays, but instant, for people who turn motion off */
@@ -165,32 +226,49 @@ const imageUrl = site ? new URL(image, site).href : image;
 		outline-offset: 3px;
 	}
 
-	/* Section names: large and tight, with an optional count in <sup> */
+	/* Section names: one size and one weight on every section */
 	.heading {
-		font-size: clamp(2rem, 1.4rem + 2.6vw, 3.5rem);
+		font-family: var(--font-display);
+		font-size: var(--step-section);
 		font-weight: 800;
 		line-height: 1;
-		letter-spacing: -0.05em;
-		margin-bottom: clamp(1.75rem, 3.5vw, 3rem);
+		letter-spacing: -0.03em;
 	}
 
-	.heading sup {
-		font-size: 0.36em;
-		font-weight: 500;
-		letter-spacing: 0;
-		vertical-align: top;
-		margin-left: 0.25em;
-		color: var(--slate);
+	/* Cards: one surface step above the paper, a hairline edge, one radius */
+	.card {
+		display: flex;
+		flex-direction: column;
+		gap: 0.75rem;
+		min-width: 0;
+		padding: clamp(1.25rem, 2.5vw, 2rem);
+		background: var(--surface);
+		color: var(--ink);
+		border: 1px solid var(--line);
+		border-radius: var(--radius-card);
+	}
+
+	/* The inverted card swaps every ink token, so links and focus rings swap with it */
+	.card-ink {
+		--paper: var(--inv-paper);
+		--ink: var(--inv-ink);
+		--slate: var(--inv-slate);
+		--line: var(--inv-line);
+		--surface: var(--inv-paper);
+		--accent: var(--inv-ink);
+		color: var(--ink);
+		border-color: var(--paper);
 	}
 
 	/* Motion targets stay hidden until src/scripts/motion.ts reveals them */
 	.js [data-hero],
 	.js [data-reveal],
-	.js .headline .w > span {
+	.js .hero .w > span {
 		visibility: hidden;
 	}
 
 	::selection {
-		background: var(--tint);
+		background: var(--ink);
+		color: var(--paper);
 	}
 </style>

@@ -4,7 +4,7 @@ import { gsap } from 'gsap';
 
 (window as Window & { __revealReady?: boolean }).__revealReady = true;
 
-const hidden = '[data-hero], [data-reveal], .headline .w > span';
+const hidden = '[data-hero], [data-reveal], .hero .w > span';
 
 // Scroll reveals: each tween is built paused (its start state applies at once) and plays
 // the first time its element enters the viewport. A plain IntersectionObserver keeps
@@ -34,17 +34,12 @@ gsap.matchMedia().add(
 			return;
 		}
 
-		// Intro: top line, then the headline word by word out of its masks, then the actions
+		// Intro: the handle rises line by line out of its masks, then the role, then the lede and actions
 		gsap
 			.timeline({ defaults: { ease: 'power4.out' }, delay: 0.15 })
-			.fromTo('[data-hero="line"]', { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.8 })
-			.fromTo(
-				'.headline .w > span',
-				{ autoAlpha: 1, yPercent: 110, rotation: 4 },
-				{ yPercent: 0, rotation: 0, duration: 1.2, stagger: 0.035 },
-				'-=0.5',
-			)
-			.fromTo('[data-hero="info"]', { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.9 }, '-=0.8');
+			.fromTo('.hero .w > span', { autoAlpha: 1, yPercent: 105 }, { yPercent: 0, duration: 1.2, stagger: 0.12 })
+			.fromTo('[data-hero="line"]', { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.8 }, '-=0.7')
+			.fromTo('[data-hero="info"]', { autoAlpha: 0, y: 16 }, { autoAlpha: 1, y: 0, duration: 0.9 }, '-=0.6');
 
 		// Section headings wipe upward into view
 		gsap.utils.toArray<HTMLElement>('[data-reveal="heading"]').forEach((el) => {
